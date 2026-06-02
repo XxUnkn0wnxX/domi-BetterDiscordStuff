@@ -238,21 +238,18 @@ const Settings = new class Settings2 extends Flux.Store {
     }
 }();
 
-/* ../common/Settings/panel.tsx */
+/* ../common/Settings/items/dropdown.tsx */
 const {
-    SettingItem,
-    SwitchInput
+    SettingItem: SettingItem$2
 } = Components;
 const Select = Webpack.getByStrings('selectionMode:"single",onSelectionChange:', "isSelected:", {
     searchExports: true
 });
-const Slider = Webpack.getByStrings("stickToMarkers");
 
 function DropdownItem(props) {
     return React.createElement(ErrorBoundary, {
-        key: props.id,
         id: props.id
-    }, React.createElement(SettingItem, {
+    }, React.createElement(SettingItem$2, {
         ...props
     }, React.createElement(
         Select, {
@@ -265,27 +262,17 @@ function DropdownItem(props) {
     )));
 }
 
-function SwitchItem(props) {
-    const value = Hooks.useStateFromStores([Settings], () => Settings.get(props.id, props.value));
-    return React.createElement(ErrorBoundary, {
-        key: props.id,
-        id: props.id
-    }, React.createElement(SettingItem, {
-        ...props,
-        inline: true
-    }, React.createElement(SwitchInput, {
-        value,
-        onChange: (v) => Settings.set(props.id, v)
-    })));
-}
+/* ../common/Settings/items/slider.tsx */
+const {
+    SettingItem: SettingItem$1
+} = Components;
+const Slider = Webpack.getByStrings("stickToMarkers");
 
 function SliderItem(props) {
-    if (!Slider) return null;
     const value = Hooks.useStateFromStores([Settings], () => Settings.get(props.id, props.value));
     return React.createElement(ErrorBoundary, {
-        key: props.id,
         id: props.id
-    }, React.createElement(SettingItem, {
+    }, React.createElement(SettingItem$1, {
         ...props
     }, React.createElement(
         Slider, {
@@ -301,15 +288,40 @@ function SliderItem(props) {
     )));
 }
 
-function SettingsPanel(props) {
+/* ../common/Settings/items/switch.tsx */
+const {
+    SettingItem,
+    SwitchInput
+} = Components;
+
+function SwitchItem(props) {
+    const value = Hooks.useStateFromStores([Settings], () => Settings.get(props.id, props.value));
+    return React.createElement(ErrorBoundary, {
+        id: props.id
+    }, React.createElement(SettingItem, {
+        ...props,
+        inline: true
+    }, React.createElement(SwitchInput, {
+        value,
+        onChange: (v) => Settings.set(props.id, v)
+    })));
+}
+
+/* ../common/Settings/panel.tsx */
+function SettingsPanel({
+    items,
+    components: customComponents
+}) {
     const ComponentMap = {
         dropdown: DropdownItem,
         switch: SwitchItem,
-        slider: SliderItem
+        slider: SliderItem,
+        ...customComponents
     };
-    return props.items.map((item) => {
+    return items.map((item) => {
         const Component = ComponentMap[item.type];
         return Component ? React.createElement(Component, {
+            key: item.id,
             ...item
         }) : null;
     });
