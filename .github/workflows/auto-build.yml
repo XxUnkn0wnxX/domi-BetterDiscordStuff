@@ -109,5 +109,9 @@ jobs:
           git add --no-all ./**
           git config --local user.email "actions@github.com"
           git config --local user.name "PluginBuilder"
+          if git diff --cached --quiet; then
+            echo "No plugin output changes to publish."
+            exit 0
+          fi
           git commit -F <(printf "%s" "$COMMIT_MSG")
           git push origin HEAD:main
