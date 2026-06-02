@@ -39,6 +39,20 @@ jobs:
       - name: Get changed files
         id: changed-files
         run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            files=$(find . -mindepth 1 -maxdepth 1 -type d \
+              ! -name ".git" \
+              ! -name ".github" \
+              ! -name ".husky" \
+              ! -name ".vscode" \
+              ! -name "archive" \
+              ! -name "node_modules" \
+              ! -name "scripts" \
+              | tr '\n' ' ')
+            echo "changed_files=$files" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
           git fetch origin ${{ github.base_ref }}
           BASE=$(git merge-base origin/${{ github.base_ref }} HEAD)
           files=$(git diff --name-only --diff-filter=AM $BASE HEAD | tr '\n' ' ')
