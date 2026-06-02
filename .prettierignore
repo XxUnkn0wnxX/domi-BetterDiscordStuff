@@ -2,4 +2,6 @@
 archive/
 build/
 node_modules/
+pnpm-lock.yaml
+*.plugin.js
 *.md

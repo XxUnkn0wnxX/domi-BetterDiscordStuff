@@ -1,4 +1,7 @@
-pnpm-lock.yaml
+.DS_Store
 package-lock.json
 node_modules/
 builds/
+tmp/
+AGENTS.md
+.venv/

@@ -1,64 +1,25 @@
-import { Components, Hooks, Webpack } from "@api";
-import { Select as SelectType, Slider as SliderType } from "@vencord/discord-types";
 import React from "react";
 
-import Settings from "./store";
-import type { SettingsItem, SettingsItemForType } from "./types";
+import { DropdownItem } from "./items/dropdown";
+import { SliderItem } from "./items/slider";
+import { SwitchItem } from "./items/switch";
+import type { AnySettingsItem, SettingsItem } from "./types";
 
-const { SettingItem, SwitchInput } = Components;
-const Select: SelectType = Webpack.getByStrings('.selectPositionTop]:"top"===', { searchExports: true });
-const Slider: SliderType = Webpack.getByStrings("stickToMarkers");
-
-function DropdownItem(props: SettingsItemForType<"dropdown">) {
-    return (
-        <SettingItem {...props}>
-            <Select
-                closeOnSelect={true}
-                options={props.options}
-                serialize={v => String(v)}
-                select={v => Settings.set(props.id, v)}
-                isSelected={v => Settings.get(props.id, props.value) === v}
-            />
-        </SettingItem>
-    );
+interface SettingsPanelProps {
+    items: Array<SettingsItem | AnySettingsItem>;
+    components?: Record<string, React.FC<any>>;
 }
 
-function SwitchItem(props: SettingsItemForType<"switch">) {
-    const value = Hooks.useStateFromStores([Settings], () => Settings.get(props.id, props.value));
-    return (
-        <SettingItem {...props} inline={true}>
-            <SwitchInput value={value} onChange={v => Settings.set(props.id, v)} />
-        </SettingItem>
-    );
-}
-
-function SliderItem(props: SettingsItemForType<"slider">) {
-    const value = Hooks.useStateFromStores([Settings], () => Settings.get(props.id, props.value));
-    return (
-        <SettingItem {...props}>
-            <Slider
-                {...props}
-                handleSize={10}
-                initialValue={value}
-                defaultValue={props.defaultValue}
-                minValue={props.minValue}
-                maxValue={props.maxValue}
-                onValueChange={(value: number) => Settings.set(props.id, Math.round(value))}
-                onValueRender={(value: number) => Math.round(value)}
-            />
-        </SettingItem>
-    );
-}
-
-export default function SettingsPanel(props: { items: SettingsItem[] }) {
-    const ComponentMap: Record<SettingsItem["type"], React.FC<any>> = {
+export default function SettingsPanel({ items, components: customComponents }: SettingsPanelProps) {
+    const ComponentMap: Record<string, React.FC<any>> = {
         dropdown: DropdownItem,
         switch: SwitchItem,
-        slider: SliderItem
+        slider: SliderItem,
+        ...customComponents
     };
 
-    return props.items.map(item => {
+    return items.map(item => {
         const Component = ComponentMap[item.type];
-        return Component ? <Component {...item} /> : null;
+        return Component ? <Component key={item.id} {...item} /> : null;
     });
 }
