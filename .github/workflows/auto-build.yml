@@ -18,6 +18,8 @@ jobs:
   build:
     name: Build Plugins
     runs-on: ubuntu-latest
+    outputs:
+      built: ${{ steps.build-plugins.outputs.built }}
     steps:
       - name: Clean working directory
         run: rm -rf /home/runner/work/${{ github.repository }}
@@ -65,15 +67,17 @@ jobs:
           echo "changed_files=$files" >> $GITHUB_OUTPUT
 
       - name: Build plugins
-        run: >-
+        id: build-plugins
+        run: |
           pnpm build --publish --plugins ${{ steps.changed-files.outputs.changed_files }}
-          && if [ ! -d builds ]; then echo "noBuildFolder=true" >> $GITHUB_ENV; fi
-
-      - name: Cancel Job when no Artifact
-        if: "env.noBuildFolder == 'true'"
-        uses: andymckay/cancel-action@0.5
+          if [ -d builds ]; then
+            echo "built=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "built=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Stage build
+        if: steps.build-plugins.outputs.built == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: build-artifact
@@ -84,6 +88,7 @@ jobs:
     name: Publish plugins
     runs-on: ubuntu-latest
     needs: build
+    if: needs.build.outputs.built == 'true'
 
     steps:
       - name: Restore repo
