@@ -4,4 +4,5 @@ node_modules/
 builds/
 tmp/
 AGENTS.md
+AGENTS.MD
 .venv/
