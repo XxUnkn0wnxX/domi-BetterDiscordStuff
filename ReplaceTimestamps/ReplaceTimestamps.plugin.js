@@ -236,24 +236,32 @@ const Settings = new class Settings2 extends Flux.Store {
 const {
     SettingItem: SettingItem$2
 } = Components;
-const Select = Webpack.getByStrings('selectionMode:"single",onSelectionChange:', "isSelected:", {
-    searchExports: true
-});
+let Select;
+
+function getSelect() {
+    Select ??= Webpack.getByStrings('selectionMode:"single",onSelectionChange:', "isSelected:", {
+        searchExports: true
+    });
+    return Select;
+}
 
 function DropdownItem(props) {
+    const value = Hooks.useStateFromStores([Settings], () => Settings.get(props.id, props.value));
+    const options = props.options;
+    const SelectComponent = getSelect();
     return React.createElement(ErrorBoundary, {
         id: props.id
     }, React.createElement(SettingItem$2, {
         ...props
-    }, React.createElement(
-        Select, {
+    }, SelectComponent ? React.createElement(
+        SelectComponent, {
             closeOnSelect: true,
-            options: props.options,
+            options,
             serialize: (v) => String(v),
             select: (v) => Settings.set(props.id, v),
-            isSelected: (v) => Settings.get(props.id, props.value) === v
+            isSelected: (v) => value === v
         }
-    )));
+    ) : null));
 }
 
 /* ../common/Settings/items/slider.tsx */
